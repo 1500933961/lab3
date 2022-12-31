@@ -4,7 +4,11 @@ typedef struct _ast ast;
 typedef struct _ast *past;
 struct _ast
 {
-	int ivalue;
+	union{
+		int ivalue;
+		float fvalue;
+	};
+	
 	char* svalue;
 	char* typeValue;
 	char *nodeTypeStr;
@@ -14,7 +18,10 @@ struct _ast
 	past next;
 };
 
-past newAstNode();
+past newAstNode(void);
+past CreatRoot(void);
 past newBinaryExp(char* oper, past left, past right);
 past newBasicNode(char* NodeType, char * sVal, int iVal, past left, past right, past Next);
 past newIfNode(past if_cond, past if_body, past else_body);
+
+void showNode(past node, int layer);

@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include "ast.h"
 
+int lines = 1;
+
+past AstRoot = NULL;
+
 past newAstNode()
 {
 	past node = malloc(sizeof(ast));
@@ -13,6 +17,13 @@ past newAstNode()
 	}
 	memset(node, 0, sizeof(ast));
 	return node;
+}
+
+past CreatRoot(void)
+{
+	past root = newAstNode();
+	root->nodeTypeStr = "TranslationUnitDecl";
+	return root;
 }
 
 past newBinaryExp(char* oper, past left, past right)
@@ -45,4 +56,28 @@ past newIfNode(past if_cond,past if_body,past else_body)
 	var->left = if_body;
 	var->right = else_body;
 	return var;
+}
+
+void showNode(past node, int layer)
+{
+	if (node == NULL)
+		return;
+	for (int i = 1; i <= layer; i++)
+	{
+		printf("|");
+	}
+	if (layer != 0)
+		printf("-");
+	printf("%-20s", node->nodeTypeStr);
+	printf("layer:%2d ", layer);
+	printf("token:<%3d , %6s > ", node->ivalue, node->svalue);
+	printf("TypeValue:%10s\n", node->typeValue);
+
+	if (node->nodeTypeStr == "IF_STMT" || node->nodeTypeStr == "WHILE_STMT")
+	{
+		showNode(node->if_cond, layer + 1);
+	}
+	showNode(node->left, layer + 1);
+	showNode(node->right, layer + 1);
+	showNode(node->next, layer);
 }

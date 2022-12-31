@@ -6,11 +6,15 @@
 #include "calc.tab.h"
 
 void yyerror(char *);
+
+extern int lines;
+
 %}
 
 DIGIT		[0-9]
 INT		    [0-9][0-9]*
-FLOAT		{DIGIT}*(\.{DIGIT}+)?(e|E[+|-]?{DIGIT}+)?
+/* FLOAT		{DIGIT}*(\.{DIGIT}+)?(e|E[+|-]?{DIGIT}+)?*/
+FLOAT		^[-]?[0-9]+(\.[0-9]+)?$
 
 WORD        [a-zA-Z]
 ID          [a-zA-Z_][a-zA-Z0-9_]*
@@ -18,8 +22,8 @@ ID          [a-zA-Z_][a-zA-Z0-9_]*
 %% 
 
 
-{INT}           {return num_INT;}
-{FLOAT}         {return num_FLOAT;} 
+{INT}           {yylval.iValue = atoi(yytext); return num_INT;}
+{FLOAT}         {yylval.iValue = atoi(yytext); return num_FLOAT;} 
 
 "int"           {return INT;}
 "float"         {return FLOAT;}
@@ -50,18 +54,23 @@ ID          [a-zA-Z_][a-zA-Z0-9_]*
 
 \(              {return LPAR;}
 \)              {return RPAR;}
-\[              {return LBRACKET;}
-\]              {return RBRACKET;}
-\{              {return LSQUARE;}
-\}              {return RSQUARE;}
+\[              {return LSQUARE;}
+\]              {return RSQUARE;}
+\{              {return LBRACKET;}
+\}              {return RBRACKET;}
 [,]             {return COMMA;}
 [;]             {return SEMICOLON;}
 
-{ID}            {return ID;}
+{ID}            {yylval.sValue = strdup(yytext); return ID;}
 
+[\n] 			{lines++;}
 [-+*/\n] 		return *yytext;
 [ \t] ; 	/* skip whitespace */
 [[:space:]]	{return -1;}
+"//".*"\n"  ;
+[/][*][^*]*[*]+([^*/][^*]*[*]+)*[/]       { /* DO NOTHING */ }
+
+<<EOF>>             { return 0; }
 
 . yyerror("invalid character");
 
